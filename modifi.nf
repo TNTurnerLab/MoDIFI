@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 process extractPeaks {
     tag "$cell"
 
-    container 'modifi.sif'
+    container "${params.modifi_container}"
 
     publishDir "${params.temp_dir}", mode: 'copy', saveAs: { "${cell}.narrowPeak" }
 
@@ -21,8 +21,8 @@ process extractPeaks {
 
 
 process ConcatenateAndSortPeaks {
-    container 'modifi.sif'
-    
+    container "${params.modifi_container}"
+ 
     publishDir "${params.temp_dir}", mode: 'copy', saveAs: { filename -> filename }
 
     input:
@@ -56,7 +56,8 @@ process ConcatenateAndSortPeaks {
 
 
 process GenerateDESeq2InputsCounts {
-    container 'modifi.sif'
+    container "${params.modifi_container}"
+
     publishDir "${params.temp_dir}", mode: 'copy', saveAs: { filename -> "${cell}_R${RepNum}_counts.txt" }
 
     input:
@@ -85,7 +86,7 @@ process GenerateDESeq2InputsCounts {
 
 
 process GenerateDESeq2InputsAnnCOUNTs{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', saveAs: { filename -> filename }
 
     input:
@@ -109,7 +110,7 @@ process GenerateDESeq2InputsAnnCOUNTs{
 }
 
 process GenerateDESeq2InputsConds{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', saveAs: { filename -> filename }
 
     input:
@@ -126,7 +127,7 @@ process GenerateDESeq2InputsConds{
 }
 
 process runDEseq{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     //publishDir "${params.output_dir}", mode: 'copy', pattern:"*_vs_*_${data_type}.txt", saveAs: { filename -> filename }
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"*_vs_*_${data_type}.txt", saveAs: { filename -> filename }
 
@@ -147,7 +148,7 @@ process runDEseq{
 }
 
 process runDEseqRSEM{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     //publishDir "${params.output_dir}", mode: 'copy', pattern:"*_vs_*_${data_type}.txt", saveAs: { filename -> filename }
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"*_vs_*_${data_type}.txt", saveAs: { filename -> filename }
 
@@ -169,7 +170,7 @@ process runDEseqRSEM{
 
 
 process getDEseqInputForRNAseqCONDS{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"RNA_*.txt", saveAs: { filename -> filename }
 
     output:
@@ -186,7 +187,7 @@ process getDEseqInputForRNAseqCONDS{
 
 
 process generateSampleInfo{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.resources_dir}", mode: 'copy', pattern:"Sample*.tsv", saveAs: { filename -> filename }
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"*piece*.tsv", saveAs: { filename -> filename }
     //publishDir "${params.temp_dir}", mode: 'copy', pattern:"*_MergedLoop*.tsv", saveAs: { filename -> filename }
@@ -218,7 +219,7 @@ process generateSampleInfo{
 }
 
 process generateSampleInfo_noInput{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.resources_dir}", mode: 'copy', pattern:"Sample*.tsv", saveAs: { filename -> filename }
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"*piece*.tsv", saveAs: { filename -> filename }
     //publishDir "${params.temp_dir}", mode: 'copy', pattern:"*_MergedLoop*.tsv", saveAs: { filename -> filename }
@@ -251,7 +252,7 @@ process generateSampleInfo_noInput{
 
 
 process MapATACWithPRO{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"PRO_ATAC*.tsv", saveAs: { filename -> filename }
 
     input:
@@ -278,7 +279,7 @@ process MapATACWithPRO{
 }
 
 process combinPRO_ATAC{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"PRO_ATAC*.tsv", saveAs: { filename -> filename }
 
     input:
@@ -297,7 +298,7 @@ process combinPRO_ATAC{
 }
 
 process MapATACWithHiCWithPRO{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"ToBacon_*.tsv", saveAs: { filename -> filename }
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"atacWithHiC*.tsv", saveAs: { filename -> filename }
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"PRO_ATAC*.tsv", saveAs: { filename -> filename }
@@ -329,7 +330,7 @@ process MapATACWithHiCWithPRO{
 }
 
 process combinAdjZFile{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"ToBacon_*.tsv", saveAs: { filename -> filename }
 
     input:
@@ -350,7 +351,7 @@ process combinAdjZFile{
 }
 
 process AdjustZInflation{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.temp_dir}", mode: 'copy', pattern:"ToBacon*bacon*.tsv", saveAs: { filename -> filename }
 
     input:
@@ -366,7 +367,7 @@ process AdjustZInflation{
 }
 
 process calMoDIFY{
-    container 'modifi.sif'
+    container "${params.modifi_container}"
     publishDir "${params.output_dir}", mode: 'copy', pattern:"MoDIFI*.tsv", saveAs: { filename -> filename }
 
     input:
@@ -387,6 +388,7 @@ process calMoDIFY{
 
 
 process generateIntermediateFile {
+    container "${params.modifi_container}"
     //publishDir "${params.output_dir}", mode: 'copy', saveAs: { filename -> filename }
 
     input:
