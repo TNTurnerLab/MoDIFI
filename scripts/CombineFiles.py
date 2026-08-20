@@ -11,6 +11,14 @@ import numpy as np
 import pandas as pd
 import glob
 
+HiC_A_COL='#chr1'
+HiC_B_COL='chr2'
+HiC_A_START_COL='x1'
+HiC_A_END_COL='x2'
+HiC_B_START_COL='y1'
+HiC_B_END_COL='y2'
+INDEX_COL='INDEX'
+
 
 def StrinToList(label):
     STRING = label.replace('"', '').replace("'", '').replace("[", '').replace("]", '')
@@ -39,6 +47,25 @@ def combineATACpro(inputFiles, OutputDir):
         DATA = DATA.drop_duplicates()
         DATA.to_csv(pattern+'.tsv', sep='\t', index=False)
 
+def reIndex(data):
+    CHROM_COL = data.columns[data.columns.str.find(HiC_A_COL)!=-1][0]
+    X1_COL = data.columns[data.columns.str.find(HiC_A_START_COL)!=-1][0]
+    X2_COL = data.columns[data.columns.str.find(HiC_A_END_COL)!=-1][0]
+    Y1_COL = data.columns[data.columns.str.find(HiC_B_START_COL)!=-1][0]
+    Y2_COL = data.columns[data.columns.str.find(HiC_B_END_COL)!=-1][0]
+    INDEX_COL_All = data.columns[data.columns.str.find(INDEX_COL)!=-1]
+    data = data.set_index(data[CHROM_COL].astype(str)+':'+data[X1_COL].astype(int).astype(str)+':'+
+                          data[X2_COL].astype(int).astype(str)+':'+data[Y1_COL].astype(int).astype(str)+':'+data[Y2_COL].astype(int).astype(str))
+    data = data.sort_values(by=[CHROM_COL, X1_COL, X2_COL, Y1_COL, Y2_COL])
+    data['CHECK'] = data.index
+    i = 1
+    for loop_index in data['CHECK'].unique():
+        for COL in INDEX_COL_All:
+            data.loc[loop_index, COL] = i
+        i+=1
+    data = data.drop(columns=['CHECK'])
+    return data
+
 def combineToBacon(inputFolder, OutputDir, SamplePair):
         dsamplepair = pd.read_csv(SamplePair, sep='\t')
         Target = dsamplepair.loc[0, 'Target']
@@ -57,6 +84,7 @@ def combineToBacon(inputFolder, OutputDir, SamplePair):
                 DATA.append(data)
         DATA = pd.concat(DATA, axis = 0)
         DATA = DATA.drop_duplicates()
+        DATA = reIndex(DATA)
         DATA.to_csv(File_endstring+'.tsv', sep='\t', index=False)
 
 
