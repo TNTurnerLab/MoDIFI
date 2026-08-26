@@ -149,7 +149,14 @@ def importData(SampleInfo, SamplePair, ResourcesDir, OutputDir, LABEL_RNA, LABEL
                     data = data[[COORDS_COL, Log2FC_COL, LFCSE_COL, Stat_Score, PValue_COL, Padj_COL]]
                     data = data.rename(columns={Stat_Score:Z_Score})
                     COORD = pd.DataFrame(list(data[COORDS_COL].str.split(':')))
-                    data[CHROM_COL] = COORD[0]
+                    COORD = pd.DataFrame(list(data[COORDS_COL].str.split(':')))
+                    data[CHROM_COL] = (
+                        COORD[0]
+                        .astype(str)
+                        .str.strip()
+                        .str.replace(r'^(?i:chr)', '', regex=True)  # remove chr/Chr/CHR
+                        )
+                    data[CHROM_COL] = 'chr' + data[CHROM_COL]
                     COORD = pd.DataFrame(list(COORD[1].str.split('-')))
                     data[START_COL] = COORD[0]
                     data[END_COL] = COORD[1]
@@ -178,6 +185,18 @@ def importData(SampleInfo, SamplePair, ResourcesDir, OutputDir, LABEL_RNA, LABEL
                 Filename = sample.loc[index, FILENAME_COL]
                 Target = sample.loc[index, TARGET_COL]
                 data = pd.read_csv(Filename, sep='\t')
+                data[HiC_A_COL] = (
+                    'chr' +
+                    data[HiC_A_COL].astype(str)
+                    .str.strip()
+                    .str.replace(r'^(?i:chr)', '', regex=True)
+                    )
+                data[HiC_B_COL] = (
+                    'chr' +
+                    data[HiC_B_COL].astype(str)
+                    .str.strip()
+                    .str.replace(r'^(?i:chr)', '', regex=True)
+                    )
                 data = data[data[HiC_A_COL].str.find('chr')!=-1]
                 data = data[data[HiC_B_COL].str.find('chr')!=-1]
                 HiC[Target] = data[[HiC_A_COL, HiC_A_START_COL, HiC_A_END_COL, 
@@ -188,6 +207,12 @@ def importData(SampleInfo, SamplePair, ResourcesDir, OutputDir, LABEL_RNA, LABEL
                 Target = sample.loc[index, TARGET_COL]
                 if np.isnan(Target)==True:
                     PRO = pd.read_csv(Filename, sep='\t')
+                    PRO[CHROM_COL] = (
+                        'chr' +
+                        PRO[CHROM_COL].astype(str)
+                        .str.strip()
+                        .str.replace(r'^(?i:chr)', '', regex=True)
+                        )
                 else:
                     PRO[Target] = pd.read_csv(Filename, sep='\t')
     return ATAC, PRO
@@ -294,6 +319,9 @@ def MapATACwithPRO(ATAC, PRO, CHROM, OutputDir, PRO_Region=5000, PRO_minOL=0.5):
     #df_Coord.to_csv(OutputDir+'PRO_ATAC_Coord.tsv', sep='\t', index=False)
     if isinstance(PRO, pd.DataFrame):
         df = mappingWithPRO(df_Coord, PRO, CHROM_N, OutputDir, name, PRO_Region, PRO_minOL)
+        for col in [STRAND_COL,GENEID_COL]:
+            if col not in df.columns:
+                df[col]=np.nan
         for name in list(ATAC_temp.keys()):
             atac = ATAC_temp[name].copy()
             for col in [OL_COL, STRAND_COL,GENEID_COL]:
@@ -323,7 +351,7 @@ def RUN(SampleInfo, SamplePair, ResourcesDir, OutputDir, CHROM, PRO_Region, PRO_
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--ResourcesDir", type=str,default='./resources/',
+    parser.add_argument("-i", "--ResourcesDir", type=str,default='./resource/',
                         help="main directory")
     parser.add_argument("-si", "--SampleInfo", type=str,default='SampleInfo.tsv',
                         help="import RNA-seq (DESeq formate), ATAC-seq, HiC and GeneList")

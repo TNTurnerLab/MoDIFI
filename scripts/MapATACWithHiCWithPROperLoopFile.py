@@ -145,6 +145,19 @@ def importData(RNA_DEseq, dSampleInfo, Target, REF_SET, ResourcesDir, OutputDir,
                 sample = sample[sample[TARGET_COL]==Target]
                 Filename = sample.iloc[0][FILENAME_COL]
                 data = pd.read_csv(Filename, sep='\t')
+                # Normalize chromosome names to chr* format
+                data[HiC_A_COL] = (
+                    'chr' +
+                    data[HiC_A_COL].astype(str)
+                    .str.strip()
+                    .str.replace(r'^(?i:chr)', '', regex=True)
+                    )
+                data[HiC_B_COL] = (
+                    'chr' +
+                    data[HiC_B_COL].astype(str)
+                    .str.strip()
+                    .str.replace(r'^(?i:chr)', '', regex=True)
+                    )
                 data = data[data[HiC_A_COL].str.find('chr')!=-1]
                 data = data[data[HiC_B_COL].str.find('chr')!=-1]
                 HiC[Target] = data[[HiC_A_COL, HiC_A_START_COL, HiC_A_END_COL, 

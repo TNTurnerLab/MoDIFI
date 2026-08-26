@@ -140,9 +140,17 @@ def runCalBF_weighted(cellline, data, Gnocchi, w_rna = 0.5, w_atacrp = 0.25):
     data['BF_iga'] = w_atacrp * np.log(data[BF_R_COL]) + w_atacrp * np.log(data[BF_P_COL]) +  w_rna * np.log(data[BF_RNA_COL])
     data_OUT = data.copy()
     data_OUT = data_OUT.set_index(data_OUT[INDEX_COL])
-    for chrom in range(1,24):
+    Gnocchi[Gnocchi_CHROM_COL] = (
+        'chr' +
+        Gnocchi[Gnocchi_CHROM_COL].astype(str)
+        .str.strip()
+        .str.replace(r'^(?i:chr)', '', regex=True)
+        )
+    for chrom in range(1,25):
         if chrom==23:
             CHR='chrX'
+        elif chrom==24:
+            CHR='chrY'
         else:
             CHR = 'chr'+str(chrom)
         Gnocchi_chrom = Gnocchi[Gnocchi[Gnocchi_CHROM_COL]==CHR]
@@ -190,7 +198,8 @@ def getMoDIFI_weighted(FINAL_bacon, Target, REF_SET,  Gnocchi):
                 if col == BF_iga_COL:
                     BFiga_COL.append(initial+'_'+col)
                 data[initial+'_'+col] = data_BASE_OUT[col]
-        data[BF_iga_COL] = np.exp(data[BFiga_COL].mean(1))
+        N = len(BFiga_COL)
+        data[BF_iga_COL] = np.exp(data[BFiga_COL].sum(1)/N)
         data[Gnocchi_COL] = data_BASE_OUT[Gnocchi_COL]
     else:
         data = data.drop(columns=["gID"])
@@ -234,8 +243,8 @@ def RUN(inputFile, OutputDir, PRIOR, CTITLE):
                 if col not in [MoDIFI_COL]:
                     MoDIFI = MoDIFI.rename(columns={col:initial+'_'+col})
         MoDIFI_nonRudant = nonRedundantDACT(MoDIFI)        
-        MoDIFI_nonRudant.to_csv(OutputDir+'MoDIFI_loop_'+File_endstring+'.tsv', sep='\t', index=False)
-        MoDIFI.to_csv(OutputDir+'MoDIFI_all_'+File_endstring+'.tsv', sep='\t', index=False)
+        MoDIFI_nonRudant.to_csv('MoDIFI_loop_'+File_endstring+'.tsv', sep='\t', index=False)
+        MoDIFI.to_csv('MoDIFI_all_'+File_endstring+'.tsv', sep='\t', index=False)
     
 def main():
     parser = argparse.ArgumentParser()

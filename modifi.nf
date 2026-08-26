@@ -21,8 +21,8 @@ process extractPeaks {
 
 
 process ConcatenateAndSortPeaks {
-    container "${params.modifi_container}"
- 
+    container 'modifi.sif'
+
     publishDir "${params.temp_dir}", mode: 'copy', saveAs: { filename -> filename }
 
     input:
@@ -35,7 +35,7 @@ process ConcatenateAndSortPeaks {
     """
     cat ${peaks.join(' ')} > all.narrowPeak
     bedtools sort -i all.narrowPeak > sort.narrowPeak
-    bedtools merge -i sort.narrowPeak -c 4,9 -o collapse,min | \\
+    bedtools merge -i sort.narrowPeak -c 4,9 -o collapse,${params.atac_merge_rule} | \\
     awk '{
         split(\$4, a, ",");
         delete seen;
@@ -49,7 +49,7 @@ process ConcatenateAndSortPeaks {
         print \$1, \$2, \$3, out, \$5;
     }' OFS="\\t" > tmp_merge.bed
     # Filter by column 5 and then remove the quality column
-    awk '\$5 > ${params.atac_minQ}' tmp_merge.bed | cut -f1-4 > merge.bed    
+    awk '\$5 > ${params.atac_minQ}' tmp_merge.bed | cut -f1-4 > merge.bed
     """
 }
 
@@ -77,7 +77,7 @@ process GenerateDESeq2InputsCounts {
         	echo "Index file missing for ${BAM_FILE}, generating now..." | tee -a ${cell}_R${RepNum}_process.log
                 samtools index ${BAM_FILE}
         fi
-        python ${params.script_dir}/atac_seq_counts.py ${merge_bed} ${BAM_FILE} \${OUTPUT_FILE} ${cell}_R${RepNum} --minQ ${params.atac_minQ}
+        python ${params.script_dir}/atac_seq_counts.py ${merge_bed} ${BAM_FILE} \${OUTPUT_FILE} ${cell}_R${RepNum} --minQ ${params.atac_mapq_minQ}
     else
     	echo "BAM file ${BAM_FILE} not found" | tee -a ${cell}_R${RepNum}_process.log
     fi
@@ -208,6 +208,7 @@ process generateSampleInfo{
     """
     python ${params.script_dir}/CheckSamplesForMoDIFI.py \\
 	-i "${params.resources_dir}/" \\
+	-p "${params.promoterFilePath}/" \\
 	-o "${params.temp_dir}/" \\
 	-l "${params.HiCLoopsFile.keySet()}" \\
 	-c "${params.HiCLoopsFile.values()}" \\
@@ -240,6 +241,7 @@ process generateSampleInfo_noInput{
     """
     python ${params.script_dir}/CheckSamplesForMoDIFI.py \\
         -i "${params.resources_dir}/" \\
+	-p "${params.promoterFilePath}/" \\
         -o "${params.temp_dir}/" \\
         -l "${params.HiCLoopsFile.keySet()}" \\
         -c "${params.HiCLoopsFile.values()}" \\
