@@ -73,12 +73,12 @@ Update the input paths and parameters in <b> modifi_example.config. </b>
     <pre> RNACountFile= absolute path  </pre>
   - Label for DESeq2 outputs:
     <pre> RNASeq='RNAseq'   </pre>
-  - The column of gene IDs for DEseq anlysis:
+  - The column of gene IDs for DESeq2 analysis:
     <pre> RNA_Key_col='GeneID'   </pre>
-  - The column of RNA counts for DEseq anlysis:
+  - The column of RNA counts for DESeq2 analysis:
     <pre> RNA_quantification='expected_count' </pre>  
 #### Hi-C:
-  - HiC files:
+  - Hi-C files:
     <pre> HiCLoopsFile= absolute path  </pre>
 
 #### Others:
@@ -104,11 +104,10 @@ Run the full workflow:
 
 ### Outputs include:
 
-- ATAC_counts.txt, ATAC_ann.txt, ATAC_conds.txt
-- RNA_counts.txt, RNA_ann.txt, RNA_conds.txt
-- Comparison results: [Target]_vs_[Reference]_ATACseq.txt, [Target]_vs_[Reference]_RNAseq.txt, etc.
-- MoDIFI results: MoDIFI_all_[Target]_vs_[Reference].tsv, MoDIFI_loop_[Target]_vs_[Reference].tsv 
-
+- MoDIFI results: MoDIFI_all_[Target]_vs_[Reference].tsv, MoDIFI_loop_[Target]_vs_[Reference].tsv
+### In temp folder (defined as temp_dir in config):
+- ATAC_counts.txt, ATAC_ann.txt
+- Comparison results: `[Target]_vs_[Reference]_ATACseq.txt`, `[Target]_vs_[Reference]_RNAseq.txt`, etc.
 ### Re-running with recalMoDIFI
 
 After the full run, edit resources/SamplePair.tsv to define new Target–Reference comparisons.
