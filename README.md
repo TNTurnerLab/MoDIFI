@@ -22,7 +22,7 @@ It supports modular workflows, containerized execution (Docker/Singularity), and
 ### Installation
 Clone the repository:
 <pre>
-git clone https://github.com/your-org/MoDIFI.git
+git clone https://github.com/tris-10/MoDIFI.git
 cd MoDIFI
 </pre>
 
