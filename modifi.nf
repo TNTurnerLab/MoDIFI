@@ -364,7 +364,7 @@ process AdjustZInflation{
 
     script:
     """
-    Rscript ${params.script_dir}/baconForDEseq.R ${ToBaconFinal}
+    Rscript ${params.script_dir}/baconForDEseq.R ${ToBaconFinal} ${params.bacon_seed}
     """
 }
 
