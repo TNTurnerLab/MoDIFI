@@ -52,6 +52,7 @@ for (in_path in file_list) {
     z_by_gid <- as.numeric(z_by_gid)              # length K
     
     # 3) run bacon on the per-gene Zs
+    set.seed(1234)
     bc_u   <- bacon::bacon(teststatistics = z_by_gid)
     adjZ_u <- bacon::tstat(bc_u)
     
